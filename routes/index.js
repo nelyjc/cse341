@@ -1,7 +1,14 @@
-const routes = require('express').Router();
-const lesson1Controller = require('../controllers/lesson1');
+// cse341/routes/index.js
+const express = require('express');
+const router = express.Router();
+const professionalController = require('../controllers/professionalController');
 
-routes.get('/', (lesson1Controller.helloRoute))
-routes.get('/hello', (lesson1Controller.helloWorldRoute));
+// Root route
+router.get('/', (req, res) => {
+  res.send('Welcome to the Professional API!');
+});
 
-module.exports = routes;
+// Professional route
+router.get('/professional', professionalController.getData);
+
+module.exports = router;

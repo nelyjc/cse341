@@ -1,10 +1,25 @@
+// cse341/server.js
 const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+require('dotenv').config();
+require('./db');
+
+const routes = require('./routes');
+const contactRoutes = require('./routes/contactRoute');
+
 const app = express();
+const port = process.env.PORT || 8080;
 
-const port = 3000;
+app.use(cors());
+app.use(bodyParser.json());
 
-app.use('/', require('./routes/index'));
+// main route (optional)
+app.use('/', routes);
 
-app.listen(process.env.port || port);
-  console.log('Web Server is listening at port ' + (process.env.port || port));
+// contacts route
+app.use('/contacts', contactRoutes);
 
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
+});
