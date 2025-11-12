@@ -1,12 +1,14 @@
 // cse341/routes/index.js
 const express = require('express');
 const router = express.Router();
+const contactControllers = require('../controllers/contactsControllers');
 const professionalController = require('../controllers/professionalController');
 
 // Root route
 router.get('/', (req, res) => {
-  res.send('Welcome to the Professional API!');
+  res.send('Welcome to the API!');
 });
+router.use('/contacts', require('./contactsRoute'));
 
 // Professional route
 router.get('/professional', professionalController.getData);
