@@ -1,37 +1,62 @@
 // cse341/server.js
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const mongodb = require('./data/database');
+const contactsRoutes = require('./routes/contactsRoute');
+require('dotenv').config();
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
 
 const app = express();
 
-const cors = require('cors');
-const bodyParser = require('body-parser');
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
+  //  res.setHeader('Access-Control-Allow-Origin', '*');
+  //  res.setHeader('Access-Control-Allow-Methods', 
+  //   'GET, POST, PUT, DELETE');
+  //   res.setHeader('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Z-Key');
+  //   next();
+   
+// Swagger setup
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Contacts API',
+      version: '1.0.0',
+      description: 'API documentation for your CSE341 Contacts project',
+    },
+    servers: [
+      {
+        url: 'http://localhost:8080',
+        description: 'Local server',
+      },
+    ],
+  },
+  apis: ['./routes/swagger.js'], 
+};
 
-require('dotenv').config();
-require('./db');
-
-const routes = require('./routes');
-const contactRoutes = require('./routes/contactsRoute');
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 
+
+// Routes
+app.use('/', require('./routes'));
+app.use('/contacts', contactsRoutes); 
+
+// MongoDB connection
 const port = process.env.PORT || 8080;
 
-app.use(cors());
-app.use(bodyParser.json());
-
-// main route (optional)
-app.use('/', require('./routes'));
-
-// contacts route
-app.use('/contacts', contactRoutes);
-
-//mongodb connection
 mongodb.initDb((err, mongodb) => {
   if (err) {
     console.error('Failed to connect to MongoDB', err);
   } else {
     app.listen(port, () => {
-  console.log(`🚀 Database is listening on port ${port}`);
-  });
-    }
+      console.log(`🚀 Server and database are running on port ${port}`);
+    });
+  }
 });
