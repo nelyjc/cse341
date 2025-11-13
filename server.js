@@ -27,12 +27,12 @@ const swaggerOptions = {
     info: {
       title: 'Contacts API',
       version: '1.0.0',
-      description: 'API documentation for your CSE341 Contacts project',
+      description: 'API documentation for CSE341 Contacts project',
     },
     servers: [
       {
-        url: 'http://localhost:8080',
-        description: 'Local server',
+        url: '/',
+        description: 'Server URL',
       },
     ],
   },
@@ -40,8 +40,9 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 
 // Routes
