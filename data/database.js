@@ -1,33 +1,26 @@
-// routes/data/database.js
-const dotenv = require('dotenv');
-dotenv.config();
+// data /database.js
+require('dotenv').config();
+const { MongoClient } = require('mongodb');
 
-const MongoClient = require('mongodb').MongoClient;
+const uri = process.env.MONGODB_URI; // must match .env
+if (!uri) throw new Error('MongoDB URI is not defined in .env');
 
-let database;
+let db;
 
-const initDb = async (callback) => {
-  if (database) {
-    console.warn("Db is already initialized!");
-    return callback(null, database);
-    } 
-    MongoClient.connect(process.env.MONGODB_URL)
-    .then((client) => {
-        database = client;
-        callback(null, database);
-    })
-    .catch((err) => {
-        callback(err);
-    }); 
-};
-const getDatabase = () => {
-    if (!database) {
-        throw new Error("Database has not been initialized.)");
-    }
-    return database;
+const initDb = async () => {
+  try {
+    const client = new MongoClient(uri);
+    await client.connect();
+    db = client.db(); // default DB from URI
+    console.log('✅ MongoDB native driver connected');
+  } catch (err) {
+    console.error('❌ Failed to connect with native driver:', err);
+  }
 };
 
-module.exports = {
-    initDb,
-    getDatabase,
+const getDb = () => {
+  if (!db) throw new Error('Database not initialized');
+  return db;
 };
+
+module.exports = { initDb, getDb };

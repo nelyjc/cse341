@@ -1,25 +1,24 @@
 // cse341/server.js
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const mongodb = require('./data/database');
+const connectDB = require('./data/connection'); // Mongoose only
 const contactsRoutes = require('./routes/contactsRoute');
-require('dotenv').config();
+const swaggerRoute = require('./routes/swagger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
-
+// Create Express app
 const app = express();
+
+// Connect to MongoDB first
+connectDB();
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
-  //  res.setHeader('Access-Control-Allow-Origin', '*');
-  //  res.setHeader('Access-Control-Allow-Methods', 
-  //   'GET, POST, PUT, DELETE');
-  //   res.setHeader('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Z-Key');
-  //   next();
-   
+
 // Swagger setup
 const swaggerOptions = {
   definition: {
@@ -31,33 +30,31 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: '/',
+        url: 'http://localhost:8080',
         description: 'Server URL',
       },
     ],
   },
-  apis: ['./routes/swagger.js'], 
+  apis: ['./routes/contactsRoute.js'], 
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 // Serve Swagger UI
+app.use('/', swaggerRoute); // Add this line to serve the Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-
 // Routes
-app.use('/', require('./routes'));
-app.use('/contacts', contactsRoutes); 
+app.use('/contacts', contactsRoutes);
 
-// MongoDB connection
+// Global error handler for uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Caught Exception:', err);
+  process.exit(1);
+});
+
+// Start server
 const port = process.env.PORT || 8080;
-
-mongodb.initDb((err, mongodb) => {
-  if (err) {
-    console.error('Failed to connect to MongoDB', err);
-  } else {
-    app.listen(port, () => {
-      console.log(`🚀 Server and database are running on port ${port}`);
-    });
-  }
+app.listen(port, () => {
+  console.log(`🚀 Server is running on port ${port}`);
 });
